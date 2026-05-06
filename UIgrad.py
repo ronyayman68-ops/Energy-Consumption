@@ -2,88 +2,68 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.express as px
-from datetime import datetime, timedelta
+from datetime import datetime
 
-# --- PAGE CONFIGURATION ---
-st.set_page_config(
-    page_title="Energy Consumption Monitor",
-    page_icon="⚡",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
+# --- SETTINGS & THEME ---
+st.set_page_config(page_title="Industrial Energy Monitor", layout="wide")
 
-# --- ICON MAPPING (Industrial Look) ---
+# Industrial Icon Assets
 ICONS = {
-    "Voltage": "https://openmoji.org/data/color/svg/26A1.svg",      # Bolt
-    "Consumption": "https://openmoji.org/data/color/svg/1F3D2.svg", # Factory
-    "Solar": "https://openmoji.org/data/color/svg/2600.svg",       # Sun
-    "Alert": "https://openmoji.org/data/color/svg/26A0.svg"        # Warning
+    "Main": "https://openmoji.org/data/color/svg/26A1.svg",
+    "Factory": "https://openmoji.org/data/color/svg/1F3ED.svg",
+    "Analytics": "https://openmoji.org/data/color/svg/1F4C8.svg",
+    "Control": "https://openmoji.org/data/color/svg/1F39B.svg"
 }
 
-# --- SIDEBAR (Project Details) ---
-st.sidebar.image(ICONS["Voltage"], width=80)
-st.sidebar.title("System Control")
-st.sidebar.info("Graduation Project: Energy Consumption Analysis")
+# --- HEADER ---
+st.title("⚡ Energy Management System (EMS)")
+st.subheader("Real-time Industrial Consumption Analytics")
+st.write(f"**System Status:** Running | **Last Sync:** {datetime.now().strftime('%H:%M:%S')}")
 
-# Simulation toggle (since we don't have the live DB connected yet)
-data_source = st.sidebar.selectbox("Data Source", ["Simulation Mode", "Live Database (Disconnected)"])
+# --- TOP KPI DASHBOARD ---
+c1, c2, c3, c4 = st.columns(4)
+c1.metric("Active Load", "420.5 kW", "12%")
+c2.metric("Daily Avg", "380.2 kW", "-2%")
+c3.metric("Peak Demand", "510.0 kW", "Normal", delta_color="off")
+c4.metric("Cost Est.", "$1,240", "$45")
 
-# --- DASHBOARD HEADER ---
-st.title("⚡ Energy Monitoring System Dashboard")
-st.write(f"Last Updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+st.divider()
 
-# --- TOP METRICS ---
-col1, col2, col3, col4 = st.columns(4)
-
-with col1:
-    st.image(ICONS["Consumption"], width=40)
-    st.metric("Total Load", "145.8 kWh", delta="+4.2%")
-
-with col2:
-    st.image(ICONS["Voltage"], width=40)
-    st.metric("Phase Voltage", "231V", delta="Stable", delta_color="normal")
-
-with col3:
-    st.image(ICONS["Solar"], width=40)
-    st.metric("Renewable Input", "12.5 kW", delta="-1.5%")
-
-with col4:
-    st.image(ICONS["Alert"], width=40)
-    st.metric("Active Alerts", "0", delta="Normal")
-
-st.write("---")
-
-# --- MAIN CHARTS ---
+# --- MAIN ANALYTICS SECTION ---
 left_col, right_col = st.columns([2, 1])
 
 with left_col:
-    st.subheader("📈 Real-time Load Profile")
-    # Mock data for the chart
-    chart_data = pd.DataFrame({
-        'Time': pd.date_range(start='2026-05-07', periods=24, freq='H'),
-        'Usage (kWh)': np.random.randint(80, 160, size=24)
+    st.subheader("📈 Load Profile (24h Window)")
+    # Simulating data flow
+    data = pd.DataFrame({
+        'Time': pd.date_range(start=datetime.now(), periods=24, freq='H'),
+        'Usage': np.random.randint(300, 500, size=24)
     })
-    fig = px.area(chart_data, x='Time', y='Usage (kWh)', color_discrete_sequence=['#00CC96'])
-    fig.update_layout(template="plotly_dark", margin=dict(l=20, r=20, t=20, b=20))
+    fig = px.line(data, x='Time', y='Usage', markers=True, template="plotly_dark")
+    fig.update_traces(line_color='#00ffcc')
     st.plotly_chart(fig, use_container_width=True)
 
 with right_col:
-    st.subheader("📊 Consumption by Sector")
-    sector_data = pd.DataFrame({
-        'Sector': ['Industrial', 'Residential', 'Commercial', 'Public'],
-        'Value': [45, 25, 20, 10]
-    })
-    fig_pie = px.pie(sector_data, values='Value', names='Sector', hole=0.4,
-                     color_discrete_sequence=px.colors.sequential.Greens_r)
-    fig_pie.update_layout(template="plotly_dark", showlegend=False)
-    st.plotly_chart(fig_pie, use_container_width=True)
+    st.subheader("🎮 Control Center")
+    st.write("Simulate Hardware Control:")
+    
+    col_a, col_b = st.columns(2)
+    with col_a:
+        if st.button("🔴 Stop Turbines", use_container_width=True):
+            st.error("Turbines Halted")
+    with col_b:
+        if st.button("🟢 Start Solar Array", use_container_width=True):
+            st.success("Solar Grid Active")
+            
+    st.write("---")
+    st.write("**Alert Thresholds**")
+    st.slider("Set Max Load Alert (kW)", 100, 1000, 600)
 
-# --- SYSTEM LOGS ---
-st.write("---")
-st.subheader("📋 System Event Logs")
-logs = [
-    {"Time": "02:10:05", "Event": "Database Handshake Initiated", "Status": "Success"},
-    {"Time": "02:05:12", "Event": "Peak Load Threshold Adjusted", "Status": "Updated"},
-    {"Time": "01:55:00", "Event": "Sensor Node 4 Connectivity", "Status": "Stable"}
-]
+# --- DATABASE LOGS MOCKUP ---
+st.subheader("📋 Recent Database Logs")
+logs = pd.DataFrame([
+    ["02:14:01", "Sensor_A1", "Voltage Spike Detected", "Warning"],
+    ["02:10:45", "System", "Auto-Backup Successful", "Normal"],
+    ["01:55:22", "Sensor_B4", "Database Connection Established", "Success"]
+], columns=["Timestamp", "Node", "Message", "Level"])
 st.table(logs)
