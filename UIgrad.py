@@ -4,66 +4,70 @@ import numpy as np
 import plotly.express as px
 from datetime import datetime
 
-# --- SETTINGS & THEME ---
-st.set_page_config(page_title="Industrial Energy Monitor", layout="wide")
+# --- SYSTEM CONFIG ---
+st.set_page_config(page_title="Energy Intelligence Dashboard", layout="wide")
 
-# Industrial Icon Assets
-ICONS = {
-    "Main": "https://openmoji.org/data/color/svg/26A1.svg",
-    "Factory": "https://openmoji.org/data/color/svg/1F3ED.svg",
-    "Analytics": "https://openmoji.org/data/color/svg/1F4C8.svg",
-    "Control": "https://openmoji.org/data/color/svg/1F39B.svg"
-}
+# Styling for a modern "Dark Industrial" look
+st.markdown("""
+    <style>
+    .main { background-color: #0e1117; }
+    .stMetric { background-color: #161b22; padding: 15px; border-radius: 10px; border: 1px solid #30363d; }
+    </style>
+    """, unsafe_allow_html=True)
 
-# --- HEADER ---
-st.title("⚡ Energy Management System (EMS)")
-st.subheader("Real-time Industrial Consumption Analytics")
-st.write(f"**System Status:** Running | **Last Sync:** {datetime.now().strftime('%H:%M:%S')}")
+# --- HEADER & STATUS ---
+st.title("🔋 Smart Energy Analytics Platform")
+st.write("Graduation Project | Technical Demo Phase")
 
-# --- TOP KPI DASHBOARD ---
-c1, c2, c3, c4 = st.columns(4)
-c1.metric("Active Load", "420.5 kW", "12%")
-c2.metric("Daily Avg", "380.2 kW", "-2%")
-c3.metric("Peak Demand", "510.0 kW", "Normal", delta_color="off")
-c4.metric("Cost Est.", "$1,240", "$45")
+with st.container():
+    c1, c2, c3 = st.columns([1, 1, 1])
+    c1.info("📡 **Gateway:** Connected")
+    c2.success("🗄️ **Database:** Handshake Active")
+    c3.warning("⚡ **Grid Load:** High Demand")
 
 st.divider()
 
-# --- MAIN ANALYTICS SECTION ---
+# --- REAL-TIME METRICS ---
+m1, m2, m3, m4 = st.columns(4)
+m1.metric("Total Consumption", "1,245 kWh", "4.5%", help="Aggregated load across all sensors")
+m2.metric("Peak Power", "85.2 kW", "-2.1%", delta_color="inverse")
+m3.metric("Cost Accrued", "$452.10", "$12.05")
+m4.metric("Co2 Footprint", "0.85 Tons", "Stable")
+
+# --- DATA VISUALIZATION AREA ---
 left_col, right_col = st.columns([2, 1])
 
 with left_col:
-    st.subheader("📈 Load Profile (24h Window)")
-    # Simulating data flow
-    data = pd.DataFrame({
+    st.subheader("📊 Consumption Profile (Last 24 Hours)")
+    # Simulating a dynamic data stream
+    df = pd.DataFrame({
         'Time': pd.date_range(start=datetime.now(), periods=24, freq='H'),
-        'Usage': np.random.randint(300, 500, size=24)
+        'Value': np.random.randint(40, 100, size=24)
     })
-    fig = px.line(data, x='Time', y='Usage', markers=True, template="plotly_dark")
-    fig.update_traces(line_color='#00ffcc')
+    fig = px.area(df, x='Time', y='Value', template="plotly_dark", color_discrete_sequence=['#00f2ff'])
+    fig.update_layout(xaxis_title=None, yaxis_title="kW/h")
     st.plotly_chart(fig, use_container_width=True)
 
 with right_col:
-    st.subheader("🎮 Control Center")
-    st.write("Simulate Hardware Control:")
+    st.subheader("⚙️ Control Panel")
+    st.write("Adjust Simulation Parameters:")
+    sim_speed = st.select_slider("Data Refresh Frequency", options=["Slow", "Normal", "Real-time"])
     
-    col_a, col_b = st.columns(2)
-    with col_a:
-        if st.button("🔴 Stop Turbines", use_container_width=True):
-            st.error("Turbines Halted")
-    with col_b:
-        if st.button("🟢 Start Solar Array", use_container_width=True):
-            st.success("Solar Grid Active")
-            
     st.write("---")
-    st.write("**Alert Thresholds**")
-    st.slider("Set Max Load Alert (kW)", 100, 1000, 600)
+    st.write("Manual Overrides:")
+    if st.button("🚨 Emergency Load Shedding", use_container_width=True):
+        st.error("Protocol Initiated: Reducing non-essential consumption.")
+    
+    if st.toggle("Enable AI Forecasting"):
+        st.write("✨ AI Model is analyzing historical trends...")
 
-# --- DATABASE LOGS MOCKUP ---
-st.subheader("📋 Recent Database Logs")
-logs = pd.DataFrame([
-    ["02:14:01", "Sensor_A1", "Voltage Spike Detected", "Warning"],
-    ["02:10:45", "System", "Auto-Backup Successful", "Normal"],
-    ["01:55:22", "Sensor_B4", "Database Connection Established", "Success"]
-], columns=["Timestamp", "Node", "Message", "Level"])
-st.table(logs)
+# --- DATA TABLES & LOGS ---
+st.write("---")
+st.subheader("📜 Recent Activity Logs")
+log_data = pd.DataFrame({
+    'Timestamp': [datetime.now().strftime("%H:%M:%S") for _ in range(3)],
+    'Module': ['Sensor_Node_04', 'Cloud_Sync', 'Auth_System'],
+    'Message': ['Voltage anomaly detected', 'Data packet transmitted', 'User admin logged in'],
+    'Priority': ['High', 'Normal', 'Low']
+})
+st.dataframe(log_data, use_container_width=True, hide_index=True)
