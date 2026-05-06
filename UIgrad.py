@@ -1,19 +1,10 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import plotly.express as px
 from datetime import datetime
 
 # --- SYSTEM CONFIG ---
 st.set_page_config(page_title="Energy Intelligence Dashboard", layout="wide")
-
-# Styling for a modern "Dark Industrial" look
-st.markdown("""
-    <style>
-    .main { background-color: #0e1117; }
-    .stMetric { background-color: #161b22; padding: 15px; border-radius: 10px; border: 1px solid #30363d; }
-    </style>
-    """, unsafe_allow_html=True)
 
 # --- HEADER & STATUS ---
 st.title("🔋 Smart Energy Analytics Platform")
@@ -29,24 +20,23 @@ st.divider()
 
 # --- REAL-TIME METRICS ---
 m1, m2, m3, m4 = st.columns(4)
-m1.metric("Total Consumption", "1,245 kWh", "4.5%", help="Aggregated load across all sensors")
-m2.metric("Peak Power", "85.2 kW", "-2.1%", delta_color="inverse")
+m1.metric("Total Consumption", "1,245 kWh", "4.5%")
+m2.metric("Peak Power", "85.2 kW", "-2.1%")
 m3.metric("Cost Accrued", "$452.10", "$12.05")
 m4.metric("Co2 Footprint", "0.85 Tons", "Stable")
 
-# --- DATA VISUALIZATION AREA ---
+# --- DATA VISUALIZATION (Using Native Streamlit Charts) ---
 left_col, right_col = st.columns([2, 1])
 
 with left_col:
-    st.subheader("📊 Consumption Profile (Last 24 Hours)")
-    # Simulating a dynamic data stream
-    df = pd.DataFrame({
-        'Time': pd.date_range(start=datetime.now(), periods=24, freq='H'),
-        'Value': np.random.randint(40, 100, size=24)
-    })
-    fig = px.area(df, x='Time', y='Value', template="plotly_dark", color_discrete_sequence=['#00f2ff'])
-    fig.update_layout(xaxis_title=None, yaxis_title="kW/h")
-    st.plotly_chart(fig, use_container_width=True)
+    st.subheader("📈 Consumption Profile (Native Line Chart)")
+    # Simulating data flow
+    chart_data = pd.DataFrame(
+        np.random.randn(24, 1) / [5] + [0.5],
+        columns=['kWh Usage']
+    )
+    # This chart is built-in to Streamlit! No Plotly needed.
+    st.line_chart(chart_data)
 
 with right_col:
     st.subheader("⚙️ Control Panel")
@@ -54,12 +44,11 @@ with right_col:
     sim_speed = st.select_slider("Data Refresh Frequency", options=["Slow", "Normal", "Real-time"])
     
     st.write("---")
-    st.write("Manual Overrides:")
     if st.button("🚨 Emergency Load Shedding", use_container_width=True):
         st.error("Protocol Initiated: Reducing non-essential consumption.")
     
     if st.toggle("Enable AI Forecasting"):
-        st.write("✨ AI Model is analyzing historical trends...")
+        st.info("✨ AI Model is analyzing trends...")
 
 # --- DATA TABLES & LOGS ---
 st.write("---")
